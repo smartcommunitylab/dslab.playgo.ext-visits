@@ -10,18 +10,18 @@ import io.quarkus.oidc.client.filter.OidcClientFilter;
 import it.smartcommunitylab.playandgo.visits.model.Campaign;
 import it.smartcommunitylab.playandgo.visits.model.TrackedInstanceInfo;
 
-@Path("/api/ext")
+@Path("/api")
 @OidcClientFilter
 @RegisterRestClient(configKey="playandgo-engine")
 public interface PlayGoEngineClientService {
 
 	@GET
-	@Path("/track/{campaignId}/{playerId}/{trackedInstanceId}")
+	@Path("/ext/track/{campaignId}/{playerId}/{trackedInstanceId}")
 	public TrackedInstanceInfo getTrackedInstanceInfo(@PathParam String campaignId, @PathParam String playerId, @PathParam String trackedInstanceId);
 	
 	
 	@GET
-	@Path("/api/campaign/{campaignId}")
+	@Path("/campaign/{campaignId}")
 	public Campaign getCampaign(@PathParam String campaignId);
 
 }

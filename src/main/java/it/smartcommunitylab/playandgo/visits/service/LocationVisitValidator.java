@@ -32,9 +32,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -60,7 +60,9 @@ public class LocationVisitValidator {
 	@ConfigProperty(name = "campaign.visit.source")
 	private String campaignVisitSource;
 	
-	private ObjectMapper mapper = new ObjectMapper();
+	private static ObjectMapper mapper = new ObjectMapper(); {
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	}
 	
 	private Map<String, Map<Periodo, List<POI>>> periodMap = new HashMap<>();
 	
@@ -68,7 +70,7 @@ public class LocationVisitValidator {
             .version(HttpClient.Version.HTTP_2)
             .build();
 	
-	@PostConstruct
+//	@PostConstruct
 	@SuppressWarnings("unchecked")
 	public void init() {
 		if (!periodMap.isEmpty()) return;
@@ -76,9 +78,9 @@ public class LocationVisitValidator {
 			Map<String, ?> map = readValue(campaignVisitSource, Map.class);
 			map.entrySet().forEach(e -> {
 				Map<Periodo, List<POI>> periods = new HashMap<>();
-				periodMap.put(e.getKey(), periods);
 				try {
 					readConfig((String)e.getValue(), periods);
+					periodMap.put(e.getKey(), periods);
 				} catch (Exception e1) {
 					logger.error(e1.getMessage(), e1);
 				}
@@ -93,7 +95,7 @@ public class LocationVisitValidator {
 				HttpRequest
 					.newBuilder()
 					.GET()
-					.uri(URI.create(campaignVisitSource))
+					.uri(URI.create(url))
                     .build(), 
                     HttpResponse.BodyHandlers.ofString());
 		
@@ -213,21 +215,36 @@ public class LocationVisitValidator {
 	
 	public static class CalendarData {
 		public List<Sfida> sfide;
+
+		public CalendarData() {
+			super();
+		}
 	}
 	
 	public static class Sfida {
 		public String nome, slug;
 		public List<Categoria> categorie;
 		public Periodo periodo;
+		public Sfida() {
+			super();
+		}
 	}
 	
 	public static class Categoria {
 		public String nome;
+
+		public Categoria() {
+			super();
+		}
 	}
 	
 	public static class Periodo {
 		public LocalDate dalDate, alDate;
 		public String dal, al;
+
+		public Periodo() {
+			super();
+		}
 
 		@Override
 		public int hashCode() {
@@ -273,6 +290,11 @@ public class LocationVisitValidator {
 	public static class POI {
 		public String poiId, poiType;
 		public double lat, lng;
+		
+		
+		public POI() {
+			super();
+		}
 		@Override
 		public int hashCode() {
 			final int prime = 31;

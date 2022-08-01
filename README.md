@@ -48,14 +48,16 @@ You can then execute your native executable with: `./target/dslab.playandgo.ext-
 
 If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.
 
-## Related Guides
+## CONFIGURATION
 
-- RESTEasy Reactive ([guide](https://quarkus.io/guides/resteasy-reactive)): A JAX-RS implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
+Environment Variables:
 
-## Provided Code
+- ``PLAYANDGO_ENGINE_URL`` URL of Play&Go engine (NO trailing slash)
+- ``AUTH_SERVER_URL`` URL of the AAC server (WITH trailing slash)
+- ``CLIENT_ID`` Client ID 
+- ``CLIENT_SECRET`` Client secret
+- ``CAMPAIGN_VISIT_SOURCE`` source for the ID-URL mapping for the visit configuration folders URLs 
+- ``GE_ENDPOINT`` Endpoint of the GE Engine (NO trailing slash)
+- ``GE_USERNAME`` username for GE (basic auth)
+- ``GE_PASSWORD`` password for GE (basic auth)
 
-### RESTEasy Reactive
-
-Easily start your Reactive RESTful Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)

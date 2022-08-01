@@ -15,6 +15,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -33,8 +34,9 @@ public class GameEngineClientService {
 	@RestClient
 	PlayGoEngineClientService engineClient;
 
-	private ObjectMapper mapper = new ObjectMapper();
-
+	private static ObjectMapper mapper = new ObjectMapper(); {
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	}
 	private Map<String, Campaign> campaignMap = new HashMap<>();
 	
 	@ConfigProperty(name = "ge.endpoint")
