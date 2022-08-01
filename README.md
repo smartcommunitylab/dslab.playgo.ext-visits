@@ -1,4 +1,5 @@
 # dslab.playandgo.ext-visits Project
+Extension for POI visits
 
 This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
