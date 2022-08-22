@@ -98,6 +98,7 @@ public class LocationVisitValidator {
 	public void reset() {
 		periodMap = new HashMap<>();
 		challengeMap = new HashMap<>();
+		init();
 	}
 	
 	private <T> T readValue(String url, Class<T> cls) throws Exception {
