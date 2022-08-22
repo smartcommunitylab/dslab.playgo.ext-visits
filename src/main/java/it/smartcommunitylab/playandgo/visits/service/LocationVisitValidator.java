@@ -23,6 +23,7 @@ import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,15 +32,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.smartcommunitylab.playandgo.visits.model.Geolocation;
 
@@ -65,6 +67,7 @@ public class LocationVisitValidator {
 	}
 	
 	private Map<String, Map<Periodo, List<POI>>> periodMap = new HashMap<>();
+	private Map<String, Map<String, Sfida>> challengeMap = new HashMap<>();
 	
 	private final HttpClient httpClient = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_2)
@@ -78,9 +81,11 @@ public class LocationVisitValidator {
 			Map<String, ?> map = readValue(campaignVisitSource, Map.class);
 			map.entrySet().forEach(e -> {
 				Map<Periodo, List<POI>> periods = new HashMap<>();
+				Map<String, Sfida> challenges = new HashMap<>();
 				try {
-					readConfig((String)e.getValue(), periods);
+					readConfig((String)e.getValue(), periods, challenges);
 					periodMap.put(e.getKey(), periods);
+					challengeMap.put(e.getKey(), challenges);
 				} catch (Exception e1) {
 					logger.error(e1.getMessage(), e1);
 				}
@@ -104,12 +109,13 @@ public class LocationVisitValidator {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void readConfig(String locationConfigUrl, Map<Periodo, List<POI>> periods) throws Exception {
+	private void readConfig(String locationConfigUrl, Map<Periodo, List<POI>> periods, Map<String, Sfida> challenges) throws Exception {
 		
 		CalendarData data = readValue(locationConfigUrl + "Calendario.json", CalendarData.class);
 		if (data.sfide != null) {
 			Map<String, List<POI>> poiMap = new HashMap<>();
 			for (Sfida sfida : data.sfide) {
+				challenges.put(sfida.slug, sfida);
 				List<POI> allPois = new LinkedList<>();
 				for (Categoria cat : sfida.categorie) {
 					if (!poiMap.containsKey(cat.nome)) {
@@ -165,6 +171,14 @@ public class LocationVisitValidator {
 		return result;
 	}
 
+	
+	public Collection<Sfida> getChallenges(String campaignId) {
+		init();
+		return challengeMap.getOrDefault(campaignId, Collections.emptyMap())
+				.values().stream().filter(s -> !Boolean.FALSE.equals(s.attiva) && s.periodo.matches(LocalDate.now()))
+				.collect(Collectors.toList());
+	}
+	
 	private static List<Geolocation> decodePoly(String leg) {
 		List<Geolocation> legPositions = new ArrayList<>();
 		int index = 0, len = leg.length();
@@ -224,6 +238,7 @@ public class LocationVisitValidator {
 	public static class Sfida {
 		public String nome, slug;
 		public List<Categoria> categorie;
+		public Boolean attiva;
 		public Periodo periodo;
 		public Sfida() {
 			super();

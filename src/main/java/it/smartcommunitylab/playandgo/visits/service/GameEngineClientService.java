@@ -6,6 +6,10 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -15,14 +19,15 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.quarkus.logging.Log;
 import it.smartcommunitylab.playandgo.visits.model.Campaign;
+import it.smartcommunitylab.playandgo.visits.model.ChallengeAssignment;
 import it.smartcommunitylab.playandgo.visits.model.ExecutionData;
 
 @ApplicationScoped
@@ -87,6 +92,46 @@ public class GameEngineClientService {
 			throw new Exception(response.body());
 		}
 		
+	}
+	
+	public void sendVisitChallengesOnCreate(String campaignId, String type, String name, Double target, Double bonus, String playerId, Date date) throws Exception {
+		
+		Map<String, Object> data = new HashMap<String, Object>();
+		data.put("bonusPointType", "green leaves");
+		data.put("bonusScore", bonus);
+		data.put("target", target);
+		data.put("poiType", type);
+		data.put("category", name);
+		data.put("periodName", "weekly");
+		data.put("counterName", "ZeroImpact_Trips");
+		
+		ChallengeAssignment challenge = new ChallengeAssignment();
+		long now = System.currentTimeMillis();
+		LocalDateTime ldt = LocalDateTime.now().plusDays(6).with(ChronoField.DAY_OF_WEEK, 1).truncatedTo(ChronoUnit.DAYS).minusSeconds(1);
+		Date end = new Date(ldt.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli());		
+		
+		challenge.setStart(new Date(now));
+		challenge.setEnd(end);
+
+		challenge.setModelName("visitPointInterest");
+		challenge.setInstanceName("'visitPointInterest" + Long.toHexString(now) + "-" + Integer.toHexString((playerId + campaignId).hashCode()));
+		
+		challenge.setData(data);
+		
+		String content = mapper.writeValueAsString(challenge);
+		
+		HttpResponse<String> response = httpClient.send(HttpRequest
+				.newBuilder()
+				.uri(URI.create(geEndpoint + "/gengine/data/game/" + getCampaign(campaignId).getGameId() + "/player/" + playerId + "/challenges"))
+				.header("Content-Type", "application/json")
+				.header("Accept", "application/json")
+				.POST(HttpRequest.BodyPublishers.ofString(content))
+                .build(), 
+                HttpResponse.BodyHandlers.ofString());
+		if (response.statusCode() != 200) {
+			Log.error("Error communication with GE: " + response.body());
+			throw new Exception(response.body());
+		}
 	}
 	
 	protected Campaign getCampaign(String id) {

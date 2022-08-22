@@ -1,5 +1,7 @@
 package it.smartcommunitylab.playandgo.visits.resource;
 
+import java.util.Collection;
+import java.util.Date;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -16,6 +18,7 @@ import it.smartcommunitylab.playandgo.visits.model.TrackedInstanceInfo;
 import it.smartcommunitylab.playandgo.visits.service.GameEngineClientService;
 import it.smartcommunitylab.playandgo.visits.service.LocationVisitValidator;
 import it.smartcommunitylab.playandgo.visits.service.LocationVisitValidator.POI;
+import it.smartcommunitylab.playandgo.visits.service.LocationVisitValidator.Sfida;
 import it.smartcommunitylab.playandgo.visits.service.PlayGoEngineClientService;
 import it.smartcommunitylab.playandgo.visits.service.SecurityService;
 
@@ -56,8 +59,14 @@ public class VisitsResource {
     }
 
 	private void processRegistrationEvent(EventModel event) {
-		// TODO Auto-generated method stub
-		
+		Collection<Sfida> challenges = validator.getChallenges(event.getCampaignId());
+		for (Sfida s : challenges) {
+			try {
+				geService.sendVisitChallengesOnCreate(event.getCampaignId(), s.slug, s.nome, 1.0, 100.0, event.getPlayerId(), new Date());
+			} catch (Exception e) {
+				logger.warn("Error processing event: " + event.toString()+" ("+e.getMessage()+")");
+			}
+		} 
 	}
 
 	private void processValidTrackEvent(EventModel event) {
