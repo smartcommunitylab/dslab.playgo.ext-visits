@@ -95,6 +95,11 @@ public class LocationVisitValidator {
 		}
 	}
 	
+	public void reset() {
+		periodMap = new HashMap<>();
+		challengeMap = new HashMap<>();
+	}
+	
 	private <T> T readValue(String url, Class<T> cls) throws Exception {
 		HttpResponse<String> send = httpClient.send(
 				HttpRequest
@@ -335,4 +340,5 @@ public class LocationVisitValidator {
 		}
 		
 	}
+
 }

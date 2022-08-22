@@ -58,6 +58,15 @@ public class VisitsResource {
     	}
     }
 
+    @POST
+    @Path("/reset")
+    public void resetConf(@QueryParam String apiKey) {
+
+    	if (!securityService.checkApiKey(apiKey)) throw new SecurityException("Invalid API Key");
+    	validator.reset();
+    	
+    }
+
 	private void processRegistrationEvent(EventModel event) {
 		Collection<Sfida> challenges = validator.getChallenges(event.getCampaignId());
 		for (Sfida s : challenges) {
