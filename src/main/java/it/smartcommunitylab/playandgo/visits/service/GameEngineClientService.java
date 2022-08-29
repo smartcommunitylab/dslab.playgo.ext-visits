@@ -100,14 +100,13 @@ public class GameEngineClientService {
 		data.put("bonusPointType", "green leaves");
 		data.put("bonusScore", bonus);
 		data.put("target", target);
-		data.put("poiType", type);
+		data.put("typePoi", type);
 		data.put("category", name);
 		data.put("periodName", "weekly");
-		data.put("counterName", "ZeroImpact_Trips");
 		
 		ChallengeAssignment challenge = new ChallengeAssignment();
 		long now = System.currentTimeMillis();
-		LocalDateTime ldt = LocalDateTime.now().plusDays(6).with(ChronoField.DAY_OF_WEEK, 1).truncatedTo(ChronoUnit.DAYS).minusSeconds(1);
+		LocalDateTime ldt = LocalDateTime.now().plusDays(7).with(ChronoField.DAY_OF_WEEK, 1).truncatedTo(ChronoUnit.DAYS).minusSeconds(1);
 		Date end = new Date(ldt.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli());		
 		
 		challenge.setStart(new Date(now));
@@ -122,7 +121,7 @@ public class GameEngineClientService {
 		
 		HttpResponse<String> response = httpClient.send(HttpRequest
 				.newBuilder()
-				.uri(URI.create(geEndpoint + "/gengine/data/game/" + getCampaign(campaignId).getGameId() + "/player/" + playerId + "/challenges"))
+				.uri(URI.create(geEndpoint + "/data/game/" + getCampaign(campaignId).getGameId() + "/player/" + playerId + "/challenges"))
 				.header("Content-Type", "application/json")
 				.header("Accept", "application/json")
 				.POST(HttpRequest.BodyPublishers.ofString(content))
