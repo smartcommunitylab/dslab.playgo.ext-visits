@@ -159,7 +159,7 @@ public class LocationVisitValidator {
 		Set<POI> result = new HashSet<>();
 		for (Periodo periodo: periods.keySet()) {
 			if (periodo.matches(ld)) {
-				List<Geolocation> tail = trip.size() > 5 ? trip.subList(trip.size() - 5, trip.size()) : trip;
+				List<Geolocation> tail = trip;// trip.size() > 5 ? trip.subList(trip.size() - 5, trip.size()) : trip;
 				List<POI> poiList = periods.get(periodo);
 				for (Geolocation point : tail) {
 					for (POI poi: poiList) {
@@ -246,6 +246,7 @@ public class LocationVisitValidator {
 		public List<Categoria> categorie;
 		public Boolean attiva;
 		public Periodo periodo;
+		public String weblink;
 		public Sfida() {
 			super();
 		}

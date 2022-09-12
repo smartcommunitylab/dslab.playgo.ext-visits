@@ -94,7 +94,7 @@ public class GameEngineClientService {
 		
 	}
 	
-	public void sendVisitChallengesOnCreate(String campaignId, String type, String name, Double target, Double bonus, String playerId, Date date) throws Exception {
+	public void sendVisitChallengesOnCreate(String campaignId, String type, String name, String weblink, Double target, Double bonus, String playerId, Date date) throws Exception {
 		
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("bonusPointType", "green leaves");
@@ -102,6 +102,7 @@ public class GameEngineClientService {
 		data.put("target", target);
 		data.put("typePoi", type);
 		data.put("category", name);
+		data.put("weblink", weblink);
 		data.put("periodName", "weekly");
 		
 		ChallengeAssignment challenge = new ChallengeAssignment();

@@ -71,7 +71,7 @@ public class VisitsResource {
 		Collection<Sfida> challenges = validator.getChallenges(event.getCampaignId());
 		for (Sfida s : challenges) {
 			try {
-				geService.sendVisitChallengesOnCreate(event.getCampaignId(), s.slug, s.nome, 1.0, 100.0, event.getPlayerId(), new Date());
+				geService.sendVisitChallengesOnCreate(event.getCampaignId(), s.slug, s.nome, s.weblink, 1.0, 100.0, event.getPlayerId(), new Date());
 			} catch (Exception e) {
 				logger.warn("Error processing event: " + event.toString()+" ("+e.getMessage()+")");
 			}
