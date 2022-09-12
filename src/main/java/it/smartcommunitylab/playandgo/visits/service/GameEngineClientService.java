@@ -10,20 +10,22 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
-
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import io.quarkus.logging.Log;
 import it.smartcommunitylab.playandgo.visits.model.Campaign;
@@ -132,6 +134,36 @@ public class GameEngineClientService {
 			Log.error("Error communication with GE: " + response.body());
 			throw new Exception(response.body());
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<String> getVisited(String campaignId, String slug, String userId) throws Exception {
+		Campaign c = getCampaign(campaignId);
+		if (c != null) {
+			HttpResponse<String> response = httpClient.send(HttpRequest
+					.newBuilder()
+					.uri(URI.create(geEndpoint + "/data/game/" + c.getGameId() + "/player/" + userId))
+					.header("Content-Type", "application/json")
+					.header("Accept", "application/json")
+					.GET()
+	                .build(), 
+	                HttpResponse.BodyHandlers.ofString());
+			if (response.statusCode() != 200) {
+				Log.error("Error communication with GE: " + response.body());
+				return Collections.emptyList();
+			}
+			String body = response.body();
+			Map<String, ?> v = mapper.readValue(body, Map.class);
+			v = (Map<String, ?>)v.get("state");
+			List<Map<String, ?>> collections = (List<Map<String, ?>>) v.get("BadgeCollectionConcept");
+			for (Map<String, ?> o : collections) {
+				if (slug.equals(o.get("name"))) {
+					List<String> list = (List<String>) o.get("badgeEarned");
+					return list;
+				}
+			}
+		}
+		return Collections.emptyList();
 	}
 	
 	protected Campaign getCampaign(String id) {

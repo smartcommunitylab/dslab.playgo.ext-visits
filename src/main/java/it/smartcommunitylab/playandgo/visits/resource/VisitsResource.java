@@ -1,13 +1,22 @@
 package it.smartcommunitylab.playandgo.visits.resource;
 
+import java.net.URI;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Response;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.resteasy.annotations.jaxrs.QueryParam;
 import org.slf4j.Logger;
@@ -40,6 +49,9 @@ public class VisitsResource {
 	@Inject
 	SecurityService securityService;
 
+	@ConfigProperty(name = "app.exturl")
+	private String extUrl;
+
     @POST
     @Path("/events")
     public void events(@QueryParam String apiKey, EventModel event) {
@@ -66,16 +78,40 @@ public class VisitsResource {
     	validator.reset();
     	
     }
+    
+    @GET
+    @Path("/visited/{campaignId}/{type}/{userId}")
+    public Response visited(@PathParam("campaignId") String campaignId, @PathParam("type") String type, @PathParam("userId") String userId) {
+    	Optional<Sfida> challenge = validator.getChallenges(campaignId).stream().filter(s -> s.slug.equals(type)).findAny();
+    	if (challenge.isPresent()) {
+        	try {
+    			List<String> visitedPois = geService.getVisited(campaignId, type, userId);
+    			String weblink = challenge.get().weblink;
+    			if (weblink != null) {
+    				weblink += "?visited="+ visitedPois.stream().collect(Collectors.joining(","));
+    				return Response.status(302).location(URI.create(weblink)).build();
+    			}
+    		} catch (Exception e) {
+    		}
+    	}
+    	return Response.noContent().build();
+    }
+    
 
 	private void processRegistrationEvent(EventModel event) {
 		Collection<Sfida> challenges = validator.getChallenges(event.getCampaignId());
 		for (Sfida s : challenges) {
 			try {
-				geService.sendVisitChallengesOnCreate(event.getCampaignId(), s.slug, s.nome, s.weblink, 1.0, 100.0, event.getPlayerId(), new Date());
+				String weblink = createLink(event.getCampaignId(), s.slug, event.getPlayerId());
+				geService.sendVisitChallengesOnCreate(event.getCampaignId(), s.slug, s.nome, weblink, 1.0, 100.0, event.getPlayerId(), new Date());
 			} catch (Exception e) {
 				logger.warn("Error processing event: " + event.toString()+" ("+e.getMessage()+")");
 			}
 		} 
+	}
+
+	private String createLink(String campaignId, String slug, String playerId) {
+		return extUrl + (extUrl.endsWith("/") ? "" : "/") + "visited/" + campaignId +"/" + slug +"/" + playerId;
 	}
 
 	private void processValidTrackEvent(EventModel event) {
