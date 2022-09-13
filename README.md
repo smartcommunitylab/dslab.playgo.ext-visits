@@ -60,4 +60,4 @@ Environment Variables:
 - ``GE_ENDPOINT`` Endpoint of the GE Engine (NO trailing slash)
 - ``GE_USERNAME`` username for GE (basic auth)
 - ``GE_PASSWORD`` password for GE (basic auth)
-
+- ``APP_EXTURL`` External endpoint of the application 
