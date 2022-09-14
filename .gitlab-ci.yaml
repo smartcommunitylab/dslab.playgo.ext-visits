@@ -14,8 +14,8 @@ variables:
   SECURE_LOG_LEVEL: info
   DS_JAVA_VERSION: 11
   DOCKER_DRIVER: overlay
-  CONTAINER_IMAGE: smartcommunitylab/playngo-visits-ext:v2-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
-  CONTAINER_IMAGE_LATEST: smartcommunitylab/playngo-visits-ext:v2-$CI_COMMIT_REF_NAME-latest
+  CONTAINER_IMAGE: smartcommunitylab/playngo-visits-ext:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
+  CONTAINER_IMAGE_LATEST: smartcommunitylab/playngo-visits-ext:$CI_COMMIT_REF_NAME-latest
   SAST_JAVA_VERSION: 11
 
 maven-build:
@@ -30,11 +30,12 @@ backend-container-build:
     name: $CI_COMMIT_REF_NAME
   script:
     - docker login -u $DHUB_USER -p $DHUB_PASS
-    - DOCKER_BUILDKIT=1 docker build -f src/main/docker/Dockerfile.jvm --build-arg VER=1.0 -t $CONTAINER_IMAGE -t $CONTAINER_IMAGE_LATEST .
+    - DOCKER_BUILDKIT=1 docker build -t $CONTAINER_IMAGE -t $CONTAINER_IMAGE_LATEST .
     - docker push $CONTAINER_IMAGE
     - docker push $CONTAINER_IMAGE_LATEST
   only:
     - dev
+    - prod
 
 include:
   - template: Security/Container-Scanning.gitlab-ci.yml
@@ -44,8 +45,8 @@ include:
 container_scanning:
   stage: container-scan
   variables:
-    DOCKER_IMAGE: smartcommunitylab/playngo-visits-ext:v2-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
-    DOCKERFILE_PATH: "src/main/docker/Dockerfile.jvm"
+    DOCKER_IMAGE: smartcommunitylab/playngo-visits-ext:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
+    DOCKERFILE_PATH: "Dockerfile"
     GIT_STRATEGY: fetch
     DOCKER_USER: ""
     DOCKER_PASSWORD: ""
@@ -63,3 +64,4 @@ deploy:
     - kubectl -n playngo-dev rollout status deployment playngo-visits-ext
   only:
     - dev
+    - prod
