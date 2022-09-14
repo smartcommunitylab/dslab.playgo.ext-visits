@@ -8,7 +8,8 @@ stages:
   - build
   - container-build
   - container-scan
-  - deploy
+  - deploy-dev
+  - deploy-prod
 
 variables:
   SECURE_LOG_LEVEL: info
@@ -51,8 +52,8 @@ container_scanning:
     DOCKER_USER: ""
     DOCKER_PASSWORD: ""
 
-deploy:
-  stage: deploy
+deploy-dev:
+  stage: deploy-dev
   image: 
     name: bitnami/kubectl:latest
     entrypoint: ['']
@@ -62,6 +63,21 @@ deploy:
     - echo "deploy playngo-visits-ext"
     - kubectl -n playngo-dev set image deployments/playngo-visits-ext playngo-visits-ext=$CONTAINER_IMAGE --record=true
     - kubectl -n playngo-dev rollout status deployment playngo-visits-ext
+  only:
+    - dev
+    - prod
+
+deploy-prod:
+  stage: deploy-prod
+  image: 
+    name: bitnami/kubectl:latest
+    entrypoint: ['']
+  environment:
+    name: platform-new
+  script:
+    - echo "deploy playngo-visits-ext"
+    - kubectl -n playngo-prod set image deployments/playngo-visits-ext playngo-visits-ext=$CONTAINER_IMAGE --record=true
+    - kubectl -n playngo-prod rollout status deployment playngo-visits-ext
   only:
     - dev
     - prod
