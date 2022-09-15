@@ -2,7 +2,6 @@ package it.smartcommunitylab.playandgo.visits.resource;
 
 import java.net.URI;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -103,7 +102,9 @@ public class VisitsResource {
 		for (Sfida s : challenges) {
 			try {
 				String weblink = createLink(event.getCampaignId(), s.slug, event.getPlayerId());
-				geService.sendVisitChallengesOnCreate(event.getCampaignId(), s.slug, s.nome, weblink, 1.0, 100.0, event.getPlayerId(), new Date());
+				geService.sendVisitChallengesOnCreate(event.getCampaignId(), s.slug, s.nome, weblink, 5.0, 100.0, event.getPlayerId(), new Date());
+				geService.sendVisitChallengesOnCreate(event.getCampaignId(), s.slug, s.nome, weblink, 15.0, 200.0, event.getPlayerId(), new Date());
+				geService.sendVisitChallengesOnCreate(event.getCampaignId(), s.slug, s.nome, weblink, 25.0, 300.0, event.getPlayerId(), new Date());
 			} catch (Exception e) {
 				logger.warn("Error processing event: " + event.toString()+" ("+e.getMessage()+")");
 			}
