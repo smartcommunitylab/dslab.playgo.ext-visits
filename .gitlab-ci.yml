@@ -15,8 +15,8 @@ variables:
   SECURE_LOG_LEVEL: info
   DS_JAVA_VERSION: 11
   DOCKER_DRIVER: overlay
-  CONTAINER_IMAGE: smartcommunitylab/playngo-visits-ext:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
-  CONTAINER_IMAGE_LATEST: smartcommunitylab/playngo-visits-ext:$CI_COMMIT_REF_NAME-latest
+  CONTAINER_IMAGE: smartcommunitylab/playngo-ext-visits:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
+  CONTAINER_IMAGE_LATEST: smartcommunitylab/playngo-ext-visits:$CI_COMMIT_REF_NAME-latest
   SAST_JAVA_VERSION: 11
 
 maven-build:
@@ -46,7 +46,7 @@ include:
 container_scanning:
   stage: container-scan
   variables:
-    DOCKER_IMAGE: smartcommunitylab/playngo-visits-ext:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
+    DOCKER_IMAGE: smartcommunitylab/playngo-ext-visits:$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA
     DOCKERFILE_PATH: "Dockerfile"
     GIT_STRATEGY: fetch
     DOCKER_USER: ""
@@ -60,9 +60,9 @@ deploy-dev:
   environment:
     name: platform-new
   script:
-    - echo "deploy playngo-visits-ext"
-    - kubectl -n playngo-dev set image deployments/playngo-visits-ext playngo-visits-ext=$CONTAINER_IMAGE --record=true
-    - kubectl -n playngo-dev rollout status deployment playngo-visits-ext
+    - echo "deploy playngo-ext-visits"
+    - kubectl -n playngo-dev set image deployments/playngo-ext-visits playngo-ext-visits=$CONTAINER_IMAGE --record=true
+    - kubectl -n playngo-dev rollout status deployment playngo-ext-visits
   only:
     - dev
     - prod
@@ -75,9 +75,9 @@ deploy-prod:
   environment:
     name: platform-new
   script:
-    - echo "deploy playngo-visits-ext"
-    - kubectl -n playngo-prod set image deployments/playngo-visits-ext playngo-visits-ext=$CONTAINER_IMAGE --record=true
-    - kubectl -n playngo-prod rollout status deployment playngo-visits-ext
+    - echo "deploy playngo-ext-visits"
+    - kubectl -n playngo-prod set image deployments/playngo-ext-visits playngo-ext-visits=$CONTAINER_IMAGE --record=true
+    - kubectl -n playngo-prod rollout status deployment playngo-ext-visits
   only:
     - dev
     - prod
