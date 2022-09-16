@@ -116,7 +116,7 @@ public class VisitsResource {
 	}
 
 	private String createLink(String campaignId, String slug, String playerId) {
-		return extUrl + (extUrl.endsWith("/") ? "" : "/") + "visited/" + campaignId +"/" + slug +"/" + playerId;
+		return extUrl + (extUrl.endsWith("/") ? "" : "/") + "api/visited/" + campaignId +"/" + slug +"/" + playerId;
 	}
 
 	private void processValidTrackEvent(EventModel event) {
