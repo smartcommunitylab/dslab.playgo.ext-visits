@@ -1,5 +1,6 @@
 package it.smartcommunitylab.playandgo.visits.service;
 
+import java.io.IOException;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.net.URI;
@@ -21,7 +22,9 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -166,10 +169,40 @@ public class GameEngineClientService {
 		return Collections.emptyList();
 	}
 	
+	public boolean isRegistered(String campaignId, String playerId) {
+		Campaign c = getCampaign(campaignId);
+		if (c == null) {
+			return true;
+		}
+		HttpResponse<String> response = null;
+		try {
+			response = httpClient.send(HttpRequest
+					.newBuilder()
+					.uri(URI.create(geEndpoint + "/data/game/" + c.getGameId() + "/player/" + playerId +"/challenges"))
+					.header("Content-Type", "application/json")
+					.header("Accept", "application/json")
+					.GET()
+			        .build(), 
+			        HttpResponse.BodyHandlers.ofString());
+			if (response.statusCode() != 200) {
+				Log.error("Error communication with GE: " + response.body());
+				return true;
+			}
+			String body = response.body();
+			List<?> v = mapper.readValue(body, List.class);
+			return v.size() > 0;
+		} catch (Exception e) {
+			Log.error("Error communication with GE: " + response.body(), e);
+			return true;
+		}
+	}
+
+	
 	protected Campaign getCampaign(String id) {
 		if (!campaignMap.containsKey(id)) {
 			campaignMap.put(id, engineClient.getCampaign(id));
 		}
 		return campaignMap.get(id);
 	}
+
 }

@@ -98,6 +98,10 @@ public class VisitsResource {
     
 
 	private void processRegistrationEvent(EventModel event) {
+		if (geService.isRegistered(event.getCampaignId(), event.getPlayerId())) {
+			logger.warn("User {} already registered for campaign {}", event.getPlayerId(), event.getCampaignId());
+			return;
+		}
 		Collection<Sfida> challenges = validator.getChallenges(event.getCampaignId());
 		for (Sfida s : challenges) {
 			try {
