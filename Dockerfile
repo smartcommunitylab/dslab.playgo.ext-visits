@@ -3,7 +3,7 @@ FROM maven:3-openjdk-11 as mvn
 COPY src/ /tmp/src
 COPY pom.xml /tmp/pom.xml
 WORKDIR /tmp
-RUN mvn package -DskipTests
+RUN --mount=type=cache,target=/root/.m2,source=/root/.m2,from=smartcommunitylab/playngo-ext-visits:cache mvn package -DskipTests
 
 FROM eclipse-temurin:11-alpine
 ARG VER=1.0
